@@ -3,16 +3,21 @@
 namespace Barryvdh\Debugbar\DataCollector;
 
 use Barryvdh\Debugbar\DataFormatter\SimpleFormatter;
-use DebugBar\Bridge\Twig\TwigCollector;
+use DebugBar\DataCollector\AssetProvider;
+use DebugBar\DataCollector\DataCollector;
+use DebugBar\DataCollector\Renderable;
+use DebugBar\DataCollector\TimeDataCollector;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
-class ViewCollector extends TwigCollector
+class ViewCollector extends DataCollector implements Renderable, AssetProvider
 {
     protected $name;
     protected $templates = [];
     protected $collect_data;
     protected $exclude_paths;
     protected $group;
+    protected $timeCollector;
 
     /**
      * Create a ViewCollector
@@ -20,14 +25,16 @@ class ViewCollector extends TwigCollector
      * @param bool|string $collectData Collects view data when true
      * @param string[] $excludePaths Paths to exclude from collection
      * @param int|bool $group Group the same templates together
+     * @param TimeDataCollector|null TimeCollector
      * */
-    public function __construct($collectData = true, $excludePaths = [], $group = true)
+    public function __construct($collectData = true, $excludePaths = [], $group = true, ?TimeDataCollector $timeCollector = null)
     {
         $this->setDataFormatter(new SimpleFormatter());
         $this->collect_data = $collectData;
         $this->templates = [];
         $this->exclude_paths = $excludePaths;
         $this->group = $group;
+        $this->timeCollector = $timeCollector;
     }
 
     public function getName()
@@ -52,6 +59,17 @@ class ViewCollector extends TwigCollector
     }
 
     /**
+     * @return array
+     */
+    public function getAssets()
+    {
+        return [
+            'css' => 'widgets/templates/widget.css',
+            'js' => 'widgets/templates/widget.js',
+        ];
+    }
+
+    /**
      * Add a View instance to the Collector
      *
      * @param \Illuminate\View\View $view
@@ -59,54 +77,85 @@ class ViewCollector extends TwigCollector
     public function addView(View $view)
     {
         $name = $view->getName();
-        $path = $view->getPath();
+        $type = null;
         $data = $view->getData();
-        $shortPath = '';
-        $type = '';
+        $path = $view->getPath();
 
-
-        // Prevent duplicates
-        $hash = $type . $path . $name . $this->collect_data ? implode(array_keys($view->getData())) : '';
-
-        if (class_exists('\Inertia\Inertia') && isset($data['page'])) {
-            $data = $data['page'];
-            $name = $data['component'];
-
-            if (!@file_exists($path = resource_path('js/Pages/' . $name . '.js'))) {
-                if (!@file_exists($path = resource_path('js/Pages/' . $name . '.vue'))) {
-                    if (!@file_exists($path = resource_path('js/Pages/' . $name . '.svelte'))) {
-                        $path = $view->getPath();
-                    }
-                }
-            } else {
-                $type = 'react';
-            }
+        if (class_exists('\Inertia\Inertia')) {
+            list($name, $type, $data, $path) = $this->getInertiaView($name, $data, $path);
         }
 
-        if ($path && is_string($path)) {
-            $path = $this->normalizeFilePath($path);
-            $shortPath = ltrim(str_replace(base_path(), '', $path), '/');
-        } elseif (is_object($path)) {
+        if (is_object($path)) {
             $type = get_class($view);
-            $path = '';
+            $path = null;
         }
 
-        if ($path && !$type) {
-            if (substr($path, -10) == '.blade.php') {
-                $type = 'blade';
-            } else {
+        if ($path) {
+            if (!$type) {
+                if (substr($path, -10) == '.blade.php') {
+                    $type = 'blade';
+                } else {
+                    $type = pathinfo($path, PATHINFO_EXTENSION);
+                }
+            }
+
+            $shortPath = $this->normalizeFilePath($path);
+            foreach ($this->exclude_paths as $excludePath) {
+                if (str_starts_with($shortPath, $excludePath)) {
+                    return;
+                }
+            }
+        }
+
+        $this->addTemplate($name, $data, $type, $path);
+
+        if ($this->timeCollector !== null) {
+            $time = microtime(true);
+            $this->timeCollector->addMeasure('View: ' . $name, $time, $time, [], 'views', 'View');
+        }
+    }
+
+    private function getInertiaView(string $name, array $data, ?string $path)
+    {
+        if (isset($data['page']) && is_array($data['page'])) {
+            $data = $data['page'];
+        }
+
+        if (isset($data['props'], $data['component'])) {
+            $name = $data['component'];
+            $data = $data['props'];
+
+            if ($files = glob(resource_path('js/Pages/' . $name . '.*'))) {
+                $path = $files[0];
                 $type = pathinfo($path, PATHINFO_EXTENSION);
+
+                if (in_array($type, ['js', 'jsx'])) {
+                    $type = 'react';
+                }
             }
         }
 
-        foreach ($this->exclude_paths as $excludePath) {
-            if (str_starts_with($path, $excludePath)) {
-                return;
-            }
+        return [$name, $type ?? '', $data, $path];
+    }
+
+    public function addInertiaAjaxView(array $data)
+    {
+        list($name, $type, $data, $path) = $this->getInertiaView('', $data, '');
+
+        if (! $name) {
+            return;
         }
+
+        $this->addTemplate($name, $data, $type, $path);
+    }
+
+    private function addTemplate(string $name, array $data, ?string $type, ?string $path)
+    {
+        // Prevent duplicates
+        $hash = $type . $path . $name . ($this->collect_data ? implode(array_keys($data)) : '');
 
         if ($this->collect_data === 'keys') {
-            $params = array_keys($view->getData());
+            $params = array_keys($data);
         } elseif ($this->collect_data) {
             $params = array_map(
                 fn ($value) => $this->getDataFormatter()->formatVar($value),
@@ -125,8 +174,8 @@ class ViewCollector extends TwigCollector
             'hash' => $hash,
         ];
 
-        if ($this->getXdebugLinkTemplate()) {
-            $template['xdebug_link'] = $this->getXdebugLink(realpath($view->getPath()));
+        if ($path && $this->getXdebugLinkTemplate()) {
+            $template['xdebug_link'] = $this->getXdebugLink($path);
         }
 
         $this->templates[] = $template;
@@ -153,6 +202,7 @@ class ViewCollector extends TwigCollector
         }
 
         return [
+            'count' => count($this->templates),
             'nb_templates' => count($this->templates),
             'templates' => $templates,
         ];

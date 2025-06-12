@@ -19,7 +19,7 @@
                     <a href="{{ route('export-customer') }}" style="color: white">Download Data</a>
                 </button>
             </div>
-            <div class="col-lg-6">
+            {{-- <div class="col-lg-6">
                 <div class="d-flex justify-content-end gap-3">
                     <div>
                         <span class="badge bg-label-warning rounded-pill mt-1">Scooter: {{ $scooter }}</span>
@@ -31,7 +31,7 @@
                         <span class="badge bg-label-primary rounded-pill mt-1">Work Permit: {{ $wp }}</span>
                     </div>
                 </div>
-            </div>
+            </div> --}}
         </div>
     </div>
 </div>

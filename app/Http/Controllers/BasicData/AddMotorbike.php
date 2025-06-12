@@ -231,49 +231,7 @@ class AddMotorbike extends Controller
           'motorbike_model_drop' => $motorbike_model_drop,
           'motorbike_no_drop' => $motorbike_no_drop,
           'motorbike_color_drop' => $motorbike_color_drop,
-          'motorbike_price_drop' => $motorbike_price_drop,
-          'totalInstock' => $totalInstock,
-          'totalOnRent' => $totalOnRent,
-          'totalMotors' => $totalMotors,
-          'tempReturn' => $tempReturn,
-          'rent_today' => $rent_today,
-          'return_today' => $return_today,
-        
-      'bigATs' => $bigATs,
-      'bigATis' => $bigATis,
-      'tempBigATis' => $tempBigATis,
-      'bigATor' => $bigATor,
-      'bigATPercentage' => $bigATPercentage,
-      'totalBigATPercentageFormatted' => $totalBigATPercentageFormatted,
-
-      'ats' => $ats,
-      'atis' => $atis,
-      'tempATis' => $tempATis,
-      'ator' => $ator,
-      'atPercentage' => $atPercentage,
-      'totalATPercentageFormatted' => $totalATPercentageFormatted,
-
-      'ccATs' => $ccATs,
-      'ccATis' => $ccATis,
-      'tempCCATis' => $tempCCATis,
-      'ccATor' => $ccATor,
-      'ccATPercentage' => $ccATPercentage,
-      'total50ccATPercentageFormatted' => $total50ccATPercentageFormatted,
-
-      'mts' => $mts,
-      'mtis' => $mtis,
-      'tempMTis' => $tempMTis,
-      'mtor' => $mtor,
-      'mtPercentage' => $mtPercentage,
-      'totalMTPercentageFormatted' => $totalMTPercentageFormatted,
-
-      'totalMotors' => $totalMotors,
-      'totalInstock' => $totalInstock,
-      'totalOnRent' => $totalOnRent,
-      'totalPercentage' => $totalPercentage,
-      'totalPercentageFormatted' => $totalPercentageFormatted,
-      'motorbikeCounts' => $motorbikeCounts,
-      'motorbikeTotalCounts' => $motorbikeTotalCounts
+          'motorbike_price_drop' => $motorbike_price_drop
       ]);
     }
 

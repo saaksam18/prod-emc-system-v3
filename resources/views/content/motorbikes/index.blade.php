@@ -24,7 +24,7 @@
 </div>
     
 {{-- Header --}}
-<div class="row">
+{{-- <div class="row">
     <div class="col-lg-6 mb-3">
         <div class="card">
             <div class="">
@@ -141,7 +141,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> --}}
 {{-- End Header --}}
 
 <div class="row">

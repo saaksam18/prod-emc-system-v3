@@ -38,7 +38,7 @@ class AddCustomer extends Controller
         $customer_gender = CustomerModel::select('gender')->distinct()->get();
 
         // Service amounts
-        $scooters = RentalModel::where('transactionType', 'New Rental')
+        /* $scooters = RentalModel::where('transactionType', 'New Rental')
         ->select('customerID')
         ->distinct()
         ->get();
@@ -52,7 +52,7 @@ class AddCustomer extends Controller
         $wps = WPModel::select('customerID')
         ->distinct()
         ->get();
-        $wp = $wps->count();
+        $wp = $wps->count(); */
         // End Service amounts
 
         $customers = CustomerModel::with('deposit','contact', 'user')
@@ -77,10 +77,7 @@ class AddCustomer extends Controller
             'customers' => $customers,
             'countriesList' => $countriesList,
             'customer_gender' => $customer_gender,
-            'customer_contacts' => $customer_contacts,
-            'scooter' => $scooter,
-            'visa' => $visa,
-            'wp' => $wp
+            'customer_contacts' => $customer_contacts
         ]);
     }
   public function create()

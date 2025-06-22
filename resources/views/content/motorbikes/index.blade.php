@@ -24,7 +24,7 @@
 </div>
     
 {{-- Header --}}
-{{-- <div class="row">
+<div class="row">
     <div class="col-lg-6 mb-3">
         <div class="card">
             <div class="">
@@ -141,7 +141,7 @@
             </div>
         </div>
     </div>
-</div> --}}
+</div>
 {{-- End Header --}}
 
 <div class="row">
@@ -338,7 +338,7 @@
                                 <td>{{ $motorbike->motorColor }}</td>
                                 <td>{{ $motorbike->engineNo }}</td>
                                 <td>{{ $motorbike->chassisNo }}</td>
-                                <td>{{ $motorbike->user->name }}</td>
+                                <td>{{ $motorbike->user->name ?? "N/A" }}</td>
                                 <td class="justify-content-between ms-2 text-nowrap">
                                     <a href="{{ route('motorbikes.edit',$motorbike->motorID) }}" class="btn btn-primary btn-xs">Edit</a>
                                     <a href="{{ route('motorbikes.sold-stolen',$motorbike->motorID) }}" class="btn btn-danger btn-xs">Sold / Lost</a>

@@ -23,6 +23,7 @@
             <p class="mb-4">Waiting for you instruction. <span class="fw-bold">New Customer?</span> Click the button</p>
 
             <a href="{{ route('rentals.index') }}" class="btn btn-sm btn-outline-primary">Manage Rental</a>
+            <a href="{{ route('print-stock') }}" class="btn btn-sm btn-outline-warning">Print Stock</a>
           </div>
         </div>
         <div class="col-sm-5 text-center text-sm-left">

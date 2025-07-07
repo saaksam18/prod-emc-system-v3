@@ -42,7 +42,7 @@ return [
             'visibility' => 'public',
         ],
 
-        's3' => [
+        /* 's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
@@ -51,6 +51,19 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+        ], */
+        'sftp_backup_server' => [
+            'driver' => 'sftp',
+            'host' => env('SFTP_BACKUP_HOST'),
+            'username' => env('SFTP_BACKUP_USERNAME'),
+            'password' => env('SFTP_BACKUP_PASSWORD'),
+            'port' => env('SFTP_BACKUP_PORT', 22),
+            'root' => env('SFTP_BACKUP_ROOT', '/home/backups/your-app-name'), // Path on the *remote* SFTP server
+            // 'privateKey' => '/path/to/private_key', // Optional: for key-based authentication
+            'visibility' => 'private',
+            'directoryPerm' => 0755,
+            'permPrivate' => 0700,
+            'timeout' => 30,
         ],
 
     ],

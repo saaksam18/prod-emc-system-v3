@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
      * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
      * @return void
      */
-    protected function schedule(Schedule $schedule)
+    protected function schedule(Schedule $schedule): void
     {
         // Clear cache every day at midnight (12:00 AM)
         $schedule->command('cache:clear')->daily();
@@ -26,6 +26,12 @@ class Kernel extends ConsoleKernel
         
         // Clear cache Config route every day at midnight (12:00 AM)
         $schedule->command('config:clear')->daily();
+
+        // Run a full backup daily at 1:00 AM, copying to all configured disks
+        $schedule->command('backup:run')->dailyAt('01:00');
+
+        // Clean up old backups according to your strategy
+        //$schedule->command('backup:clean')->dailyAt('02:00');
     }
 
     /**
